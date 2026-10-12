@@ -1,6 +1,6 @@
 #Este script es para correr el análisis de las muestras de suelo.
 
-# Recomiendo crear un ambiente e instalar qiime2 para evitar problemas de compatibilidad, usaremos qiime2 versión 2024.10, ya que el ejemplo usó esta versión.
+# Recomiendo crear un ambiente e instalar qiime2 para evitar problemas de compatibilidad, usaremos qiime2 versión 2024.10, ya que el ejemplo usó esta versión.                                                                                                                                                                                                                                                                                                                                   .
 conda env create \
   --name rachis-qiime2-2024.10 \
   --file https://raw.githubusercontent.com/qiime2/distributions/refs/heads/dev/2024.10/amplicon/released/qiime2-amplicon-ubuntu-latest-conda.yml
@@ -117,10 +117,42 @@ qiime phylogeny align-to-tree-mafft-fasttree \
   --o-tree unrooted-tree.qza \
   --o-rooted-tree rooted-tree.qza
 
-# Ahora transformamos el artefacto a un archivo newick el cual se puede visualizar en múltiples programas para árboles, como phyloseq o MEGA. El archivo se encuentra en la carpeta de árbol.
+# Ahora transformamos el artefacto a un archivo newick (.nwk) el cual se puede visualizar en múltiples programas para árboles, como phyloseq o MEGA. El archivo se encuentra en la carpeta de figuras, con nombre "árbol".
 qiime tools export \
   --input-path unrooted-tree.qza \
   --output-path exported-tree
+
+
+
+########################################
+## Análisis de diversidad alfa y beta ##
+########################################
+
+# Estos análisis los podemos realizar con el plugin "q2-diversity" el cual utiliza análisis estadísticos y genera plots interactivos. Primero utilizaremos el método de "core-metrics-phylogenetic" que rarefactua una tabla de frecuencia a una profundidad determinada, aplica los análisis de diversidad alfa y beta y genera un Análisis de Coordenadas Principales (PCoA) utilizando EMPeror el cual es una herramienta para visualizar plots.
+# Las métricas que se calculan por defecto son:
+# Diversidad Alfa:
+## Índice de diversidad de Shannon (riqueza de la comunidad cuantitativamente).
+## Características observadas (riqueza de la comunidad cualitativamente).
+## Diversidad filogenética de Faith (riqueza de la comunidad cualitativamente, que incorpora relaciones filogenéticas entre las ellas).
+## Equitatividad de la comunidad (Pielou)
+
+# Diversidad Beta:
+## Distancia de Jaccard (disimilitud de la comunidad cualitativamente).
+## Distancia de Bray-Curtis (disimilitud de la comunidad cuantitativamente).
+## Distancia UniFrac no ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
+## Distancia UniFrac ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
+
+# En la profundidad (depth) que elegiremos, tenemos que basarnos en las muestras que tenemos de nuestras secuencias, esto es arbitrario y hay que investigar bien para saber cuál será la profundidad, en este caso, como son pocas, elegiremos 390. Esto lo podemos checar en el table.qzv que se nos generó (se encuentra en la carpeta de qiime2).
+
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-tree.qza \
+  --i-table table.qza \
+  --p-sampling-depth 390 \
+  --m-metadata-file sample-metadata.tsv \
+  --output-dir core-metrics-results
+
+# Ahora podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras).
+
 
 
 
