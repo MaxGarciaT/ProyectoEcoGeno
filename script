@@ -128,7 +128,8 @@ qiime tools export \
 ## Análisis de diversidad alfa y beta ##
 ########################################
 
-# Estos análisis los podemos realizar con el plugin "q2-diversity" el cual utiliza análisis estadísticos y genera plots interactivos. Primero utilizaremos el método de "core-metrics-phylogenetic" que rarefactua una tabla de frecuencia a una profundidad determinada, aplica los análisis de diversidad alfa y beta y genera un Análisis de Coordenadas Principales (PCoA) utilizando EMPeror el cual es una herramienta para visualizar plots.
+# Estos análisis los podemos realizar con el plugin "q2-diversity" el cual utiliza análisis estadísticos y genera plots interactivos. Utilizaremos el método de "core-metrics-phylogenetic" que rarefactua una tabla de frecuencia a una profundidad determinada, aplica los análisis de diversidad alfa y beta y genera un Análisis de Coordenadas Principales (PCoA) utilizando EMPeror el cual es una herramienta para visualizar plots.
+
 # Las métricas que se calculan por defecto son:
 # Diversidad Alfa:
 ## Índice de diversidad de Shannon (riqueza de la comunidad cuantitativamente).
@@ -162,13 +163,25 @@ qiime diversity alpha-group-significance \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization core-metrics-results/evenness-group-significance.qzv
 
-# Ahora podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras), y si le cambiamos a todas a que nos diferencie por vegetación, podemos ver las diferencias en todas las gráficas.
+# Finalmente podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras), y si le cambiamos a todas a que nos diferencie por vegetación, podemos ver las diferencias en todas las gráficas.
 
 
-## 
+# Ahora realizaremos un análisis de PERMANOVA (Análisis de varianza multivariado permutacional), el cual es un análisis no parámetrico para comparar entre grupos multivariados. Utilizaremos los datos de diversidad beta. Se puede comparar qué muestras se diferencian entre grupos y cuáles grupos difieren. Se utilizarán las distancias no ponderadas UniFrac realizadas previamente.
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column vegetation \
+  --o-visualization core-metrics-results/unweighted-unifrac-vegetation-significance.qzv \
+  --p-pairwise
 
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column transect-name \
+  --o-visualization core-metrics-results/unweighted-unifrac-transect-name-significance.qzv \
+  --p-pairwise
 
-
+# Los archivos se pueden visualizar en la carpeta de figuras, recomiendo visualizar la figura de "unweighted-unifrac-vegetation...".
 
 
 
