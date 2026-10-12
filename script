@@ -196,20 +196,38 @@ qiime diversity alpha-rarefaction \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization alpha-rarefaction.qzv
 
+# El archivo se encuentra en la carpeta figuras como "alpha-rarefaction.qzv".
 # La visualización contiene 2 plots, el primero es el de rarefacción alfa, y es el principal para revisar que se haya muestreado lo suficiente la riqueza. El plot de abajo se utiliza comparando entre grupos, indica cuantas muestras hay con esa profundidad. 
 
 ##########################
 ## Análisis taxonómicos ##
 ##########################
 
-# 
+# Ahora analizaremos la composición taxonómica  de las muestras. El primer paso es asignar una clasificación taxonómica a cada secuencia. Utilizaremos el identificador que nos ofrece el tutorial de qiime2: "Naive Bayes classifier" con el plugin "q2-feature-classifier". El clasificador fue entrenado con OTU's de Greengenes 13_8 99%, donde las secuencias se cortaron a 250 bases de la región 16S V4 (primers 515F/806R).
+# Instalamos el clasificador
+wget \
+  -O "gg-13-8-99-515-806-nb-classifier.qza" \
+  "https://data.qiime2.org/classifiers/sklearn-1.4.2/greengenes/gg-13-8-99-515-806-nb-classifier.qza"
 
+# Ahora realizamos el análisis
+qiime feature-classifier classify-sklearn \
+  --i-classifier gg-13-8-99-515-806-nb-classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
 
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
 
+# Ahora tenemos la tabla con la clasificación taxonómica, pero mejor realizamos la gráfica para poder visualizar mejor.
+qiime taxa barplot \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization taxa-bar-plots.qzv
 
-
-
-
+# La figura se encuentra en la carpeta figuras con nombre "taxa-bar-plots.qzv".
+# Podemos visualizar la gráfica y ordenarla con diferentes niveles taxonómicos, por ejemplo, dominio, filo, clase, orden, etc.
 
 
 
