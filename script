@@ -151,11 +151,21 @@ qiime diversity core-metrics-phylogenetic \
   --m-metadata-file sample-metadata.tsv \
   --output-dir core-metrics-results
 
-# Ahora podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras).
+# Una vez aplicados los análisis de diversidad, podemos realizar comparaciones en la composición microbiana, por ejemplo, ver cómo cambia la diversidad alfa con respecto a diferentes variables (columnas).
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/faith_pd_vector.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization core-metrics-results/faith-pd-group-significance.qzv
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/evenness_vector.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization core-metrics-results/evenness-group-significance.qzv
+
+# Ahora podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras), y si le cambiamos a todas a que nos diferencie por vegetación, podemos ver las diferencias en todas las gráficas.
 
 
-
-
+## 
 
 
 
