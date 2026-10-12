@@ -109,10 +109,18 @@ qiime metadata tabulate \
 ###################################
 
 # Una de las funciones de qiime2 es la creación de árboles filogenéticos, con base a otros paquetes realizados. En este caso el plugin de "q2-phylogney" nos proporcionará las herramientas para realizarlo.
+# Primero necesitamos alinear las secuencias, esto lo lograremos utilizando MAFFT, un programa que sirve para alinear secuencias, después filtrará los loci (posiciones de nucleótido) más variables y el programa "FastTree" que viene con el plugin, nos dará un árbol sin raíz.
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences rep-seqs.qza \
+  --o-alignment aligned-rep-seqs.qza \
+  --o-masked-alignment masked-aligned-rep-seqs.qza \
+  --o-tree unrooted-tree.qza \
+  --o-rooted-tree rooted-tree.qza
 
-
-
-
+# Ahora transformamos el artefacto a un archivo newick el cual se puede visualizar en múltiples programas para árboles, como phyloseq o MEGA. El archivo se encuentra en la carpeta de árbol.
+qiime tools export \
+  --input-path unrooted-tree.qza \
+  --output-path exported-tree
 
 
 
