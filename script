@@ -229,19 +229,3 @@ qiime taxa barplot \
 # La figura se encuentra en la carpeta figuras con nombre "taxa-bar-plots.qzv".
 # Podemos visualizar la gráfica y ordenarla con diferentes niveles taxonómicos, por ejemplo, dominio, filo, clase, orden, etc.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
