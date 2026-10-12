@@ -1,0 +1,65 @@
+#Este script es para correr el análisis de las muestras de suelo.
+
+# Recomiendo crear un ambiente e instalar qiime2 para evitar problemas de compatibilidad, usaremos qiime2 versión 2024.10, ya que el ejemplo usó esta versión.
+conda env create \
+  --name rachis-qiime2-2024.10 \
+  --file https://raw.githubusercontent.com/qiime2/distributions/refs/heads/dev/2024.10/amplicon/released/qiime2-amplicon-ubuntu-latest-conda.yml
+
+# # verificamos si se instaló bien el ambiente y lo activamos
+conda deactivate
+conda activate rachis-qiime2-2024.10
+qiime info
+
+# Creamos un directorio (mkdir) con el ejemplo del código y cambiamos el directorio (cd) de trabajo a la nueva carpeta creada.
+mkdir qiime2-atacama-tutorial
+cd qiime2-atacama-tutorial
+
+# Descargamos los datos (wget) de la base de datos que se mostró en la metadata en un archivo separado por tabuladores (tsv). Con -O inidicamos el nombre del archivo y después la URL del archivo.
+wget \
+  -O "sample-metadata.tsv" \
+  "https://data.qiime2.org/2024.10/tutorials/atacama-soils/sample_metadata.tsv"
+
+# Creamos otros directorio para las secuencias que descargaremos, serán 3 archivos fastq.gz, las cuales son forward, reverse y barcode, las cuales están reducidas para correr rápido el script.
+  mkdir emp-paired-end-sequences
+
+# Descargamos las secuencias y las enviamos al directorio que creamos.
+# forward
+wget \
+  -O "emp-paired-end-sequences/forward.fastq.gz" \
+  "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/forward.fastq.gz"
+
+# reverse
+wget \
+  -O "emp-paired-end-sequences/reverse.fastq.gz" \
+  "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/reverse.fastq.gz"
+
+# barcode
+wget \
+  -O "emp-paired-end-sequences/barcodes.fastq.gz" \
+  "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/barcodes.fastq.gz"
+
+# Ahora tenemos que transformar los archivos que instalamos en "artefacto" de tipo "EMPPairedEndSequences". Los artefactos son archivos los cuales qiime2 los puede leer (los metadatos) de mejor manera.
+qiime tools import \
+   --type EMPPairedEndSequences \
+   --input-path emp-paired-end-sequences \
+   --output-path emp-paired-end-sequences.qza
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
