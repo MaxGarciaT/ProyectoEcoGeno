@@ -44,6 +44,77 @@ qiime tools import \
    --input-path emp-paired-end-sequences \
    --output-path emp-paired-end-sequences.qza
 
+# Ahora hay que hacer el "demultiplexing" a las secuencias, ya que al secuenciar el tecnología como Illumina, las secuencias de ADN se agrupan todas, aunque se les asigna el famoso "Barcode" y así se pueden identificar.
+# Elegimos el archivo que vamos a demultiplexear, escojemos la columna de la base de datos de donde se extraerá el barcode (o ID), y también la parte reversa del barcode. Seleccionamos el nombre de salida de los archivos y pedimos detalles del proceso.
+qiime demux emp-paired \
+  --m-barcodes-file sample-metadata.tsv \
+  --m-barcodes-column barcode-sequence \
+  --p-rev-comp-mapping-barcodes \
+  --i-seqs emp-paired-end-sequences.qza \
+  --o-per-sample-sequences demux-full.qza \
+  --o-error-correction-details demux-details.qza
+
+# Vamos a submuestrear las muestras, esto para realizar el ejemplo más rápido y ver la funcionalidad de q2-demux, el cual es un plugin que sirve para demultiplexear los datos y visualizarlos.
+qiime demux subsample-paired \
+  --i-sequences demux-full.qza \
+  --p-fraction 0.3 \
+  --o-subsampled-sequences demux-subsample.qza
+
+# Generamos el archivo que se puede visualizar, se encuentra en la carpeta de "plots" del github. Podemos visualizar que hay 75 muestras en total. Hay algunas que tienen menos de 100 lecturas, entonces hay que filtrarlas.
+qiime demux summarize \
+  --i-data demux-subsample.qza \
+  --o-visualization demux-subsample.qzv
+
+# Filtramos
+qiime tools export \
+  --input-path demux-subsample.qzv \
+  --output-path ./demux-subsample/
+
+qiime demux filter-samples \
+  --i-demux demux-subsample.qza \
+  --m-metadata-file ./demux-subsample/per-sample-fastq-counts.tsv \
+  --p-where 'CAST([forward sequence count] AS INT) > 100' \
+  --o-filtered-demux demux.qza
+
+# Después, de las secuencias filtradas, se analizarán 10,000 al azar y se les hará "denoise", es decir, quitaremos ruido que puedan afectar nuestras secuencias, usando el plugin "dada2". Cada lectura mide 150 bases, suficientes para que sobrelapen. Además, se cortarán las primeras 13 bases.
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs demux.qza \
+  --p-trim-left-f 13 \
+  --p-trim-left-r 13 \
+  --p-trunc-len-f 150 \
+  --p-trunc-len-r 150 \
+  --o-table table.qza \
+  --o-representative-sequences rep-seqs.qza \
+  --o-denoising-stats denoising-stats.qza
+
+# En este punto, tenemos artefactos los cuales contienen tablas con los datos de las secuencias y los diágnosticos de la limpieza de ruido de DADA2. Se pueden realizar resúmenes.
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file sample-metadata.tsv
+
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+
+qiime metadata tabulate \
+  --m-input-file denoising-stats.qza \
+  --o-visualization denoising-stats.qzv
+
+# Ahora podemos visualizar la calidad de nuestros datos, dependiendo de nuestra pregunta y necesidades sabremos si están bien. Los archivos se encuentran en la carpeta de plots.
+
+
+###################################
+## Generar un árbol filogenético ##
+###################################
+
+# Una de las funciones de qiime2 es la creación de árboles filogenéticos, con base a otros paquetes realizados. En este caso el plugin de "q2-phylogney" nos proporcionará las herramientas para realizarlo.
+
+
+
+
+
+
 
 
 
