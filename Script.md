@@ -1,51 +1,79 @@
-#Este script es para correr el análisis de las muestras de suelo.
+# Este script es para correr el análisis de las muestras de suelo.
 
-# Recomiendo crear un ambiente e instalar qiime2 para evitar problemas de compatibilidad, usaremos qiime2 versión 2024.10, ya que el ejemplo usó esta versión.                                                                                                                                                                                                                                                                                                                                   .
+## Recomiendo crear un ambiente e instalar qiime2 para evitar problemas de compatibilidad, usaremos qiime2 versión 2024.10, ya que el ejemplo usó esta versión.                                                                    
+```
 conda env create \
   --name rachis-qiime2-2024.10 \
   --file https://raw.githubusercontent.com/qiime2/distributions/refs/heads/dev/2024.10/amplicon/released/qiime2-amplicon-ubuntu-latest-conda.yml
+```
 
-# # verificamos si se instaló bien el ambiente y lo activamos
+## verificamos si se instaló bien el ambiente y lo activamos
+
+```
 conda deactivate
 conda activate rachis-qiime2-2024.10
 qiime info
+```
 
-# Creamos un directorio (mkdir) con el ejemplo del código y cambiamos el directorio (cd) de trabajo a la nueva carpeta creada.
+## Creamos un directorio (mkdir) con el ejemplo del código y cambiamos el directorio (cd) de trabajo a la nueva carpeta creada.
+
+```
 mkdir qiime2-atacama-tutorial
 cd qiime2-atacama-tutorial
+```
 
-# Descargamos los datos (wget) de la base de datos que se mostró en la metadata en un archivo separado por tabuladores (tsv). Con -O inidicamos el nombre del archivo y después la URL del archivo.
+## Descargamos los datos (wget) de la base de datos que se mostró en la metadata en un archivo separado por tabuladores (tsv). Con -O indicamos el nombre del archivo y después la URL del archivo.
+
+```
 wget \
   -O "sample-metadata.tsv" \
   "https://data.qiime2.org/2024.10/tutorials/atacama-soils/sample_metadata.tsv"
+```
 
-# Creamos otros directorio para las secuencias que descargaremos, serán 3 archivos fastq.gz, las cuales son forward, reverse y barcode, las cuales están reducidas para correr rápido el script.
+## Creamos otros directorio para las secuencias que descargaremos, serán 3 archivos fastq.gz, las cuales son forward, reverse y barcode, las cuales están reducidas para correr rápido el script.
+
+```
   mkdir emp-paired-end-sequences
+```
 
-# Descargamos las secuencias y las enviamos al directorio que creamos.
-# forward
+## Descargamos las secuencias y las enviamos al directorio que creamos.
+### forward
+
+```
 wget \
   -O "emp-paired-end-sequences/forward.fastq.gz" \
   "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/forward.fastq.gz"
+```
 
-# reverse
+### reverse
+
+```
 wget \
   -O "emp-paired-end-sequences/reverse.fastq.gz" \
   "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/reverse.fastq.gz"
+```
 
-# barcode
+### barcode
+
+```
 wget \
   -O "emp-paired-end-sequences/barcodes.fastq.gz" \
   "https://data.qiime2.org/2024.10/tutorials/atacama-soils/10p/barcodes.fastq.gz"
+```
 
-# Ahora tenemos que transformar los archivos que instalamos en "artefacto" de tipo "EMPPairedEndSequences". Los artefactos son archivos los cuales qiime2 los puede leer (los metadatos) de mejor manera.
+## Ahora tenemos que transformar los archivos que instalamos en "artefacto" de tipo "EMPPairedEndSequences". Los artefactos son archivos los cuales qiime2 los puede leer (los metadatos) de mejor manera.
+
+```
 qiime tools import \
    --type EMPPairedEndSequences \
    --input-path emp-paired-end-sequences \
    --output-path emp-paired-end-sequences.qza
+```
 
-# Ahora hay que hacer el "demultiplexing" a las secuencias, ya que al secuenciar el tecnología como Illumina, las secuencias de ADN se agrupan todas, aunque se les asigna el famoso "Barcode" y así se pueden identificar.
-# Elegimos el archivo que vamos a demultiplexear, escojemos la columna de la base de datos de donde se extraerá el barcode (o ID), y también la parte reversa del barcode. Seleccionamos el nombre de salida de los archivos y pedimos detalles del proceso.
+## Ahora hay que hacer el "demultiplexing" a las secuencias, ya que al secuenciar el tecnología como Illumina, las secuencias de ADN se agrupan todas, aunque se les asigna el famoso "Barcode" y así se pueden identificar.
+### Elegimos el archivo que vamos a demultiplexear, escogemos la columna de la base de datos de donde se extraerá el barcode (o ID), y también la parte reversa del barcode. Seleccionamos el nombre de salida de los archivos y pedimos detalles del proceso.
+
+```
 qiime demux emp-paired \
   --m-barcodes-file sample-metadata.tsv \
   --m-barcodes-column barcode-sequence \
@@ -53,30 +81,44 @@ qiime demux emp-paired \
   --i-seqs emp-paired-end-sequences.qza \
   --o-per-sample-sequences demux-full.qza \
   --o-error-correction-details demux-details.qza
+```
 
-# Vamos a submuestrear las muestras, esto para realizar el ejemplo más rápido y ver la funcionalidad de q2-demux, el cual es un plugin que sirve para demultiplexear los datos y visualizarlos.
+## Vamos a submuestrear las muestras, esto para realizar el ejemplo más rápido y ver la funcionalidad de q2-demux, el cual es un plugin que sirve para demultiplexear los datos y visualizarlos.
+
+```
 qiime demux subsample-paired \
   --i-sequences demux-full.qza \
   --p-fraction 0.3 \
   --o-subsampled-sequences demux-subsample.qza
+```
 
-# Generamos el archivo que se puede visualizar, se encuentra en la carpeta de "plots" del github. Podemos visualizar que hay 75 muestras en total. Hay algunas que tienen menos de 100 lecturas, entonces hay que filtrarlas.
+## Generamos el archivo que se puede visualizar, se encuentra en la carpeta de "plots" del github. Podemos visualizar que hay 75 muestras en total. Hay algunas que tienen menos de 100 lecturas, entonces hay que filtrarlas.
+
+```
 qiime demux summarize \
   --i-data demux-subsample.qza \
   --o-visualization demux-subsample.qzv
+```
 
-# Filtramos
+## Filtramos
+
+```
 qiime tools export \
   --input-path demux-subsample.qzv \
   --output-path ./demux-subsample/
+```
 
+```
 qiime demux filter-samples \
   --i-demux demux-subsample.qza \
   --m-metadata-file ./demux-subsample/per-sample-fastq-counts.tsv \
   --p-where 'CAST([forward sequence count] AS INT) > 100' \
   --o-filtered-demux demux.qza
+```
 
-# Después, de las secuencias filtradas, se analizarán 10,000 al azar y se les hará "denoise", es decir, quitaremos ruido que puedan afectar nuestras secuencias, usando el plugin "dada2". Cada lectura mide 150 bases, suficientes para que sobrelapen. Además, se cortarán las primeras 13 bases.
+## Después, de las secuencias filtradas, se analizarán 10,000 al azar y se les hará "denoise", es decir, quitaremos ruido que puedan afectar nuestras secuencias, usando el plugin "dada2". Cada lectura mide 150 bases, suficientes para que sobrelapen. Además, se cortarán las primeras 13 bases.
+
+```
 qiime dada2 denoise-paired \
   --i-demultiplexed-seqs demux.qza \
   --p-trim-left-f 13 \
@@ -86,145 +128,184 @@ qiime dada2 denoise-paired \
   --o-table table.qza \
   --o-representative-sequences rep-seqs.qza \
   --o-denoising-stats denoising-stats.qza
+```
 
-# En este punto, tenemos artefactos los cuales contienen tablas con los datos de las secuencias y los diágnosticos de la limpieza de ruido de DADA2. Se pueden realizar resúmenes.
+## En este punto, tenemos artefactos los cuales contienen tablas con los datos de las secuencias y los diágnosticos de la limpieza de ruido de DADA2. Se pueden realizar resúmenes.
+
+```
 qiime feature-table summarize \
   --i-table table.qza \
   --o-visualization table.qzv \
   --m-sample-metadata-file sample-metadata.tsv
+```
 
+```
 qiime feature-table tabulate-seqs \
   --i-data rep-seqs.qza \
   --o-visualization rep-seqs.qzv
+```
 
+```
 qiime metadata tabulate \
   --m-input-file denoising-stats.qza \
   --o-visualization denoising-stats.qzv
+```
 
-# Ahora podemos visualizar la calidad de nuestros datos, dependiendo de nuestra pregunta y necesidades sabremos si están bien. Los archivos se encuentran en la carpeta de plots.
+#### Ahora podemos visualizar la calidad de nuestros datos, dependiendo de nuestra pregunta y necesidades sabremos si están bien. Los archivos se encuentran en la carpeta de plots.
 
 
-###################################
-## Generar un árbol filogenético ##
-###################################
 
-# Una de las funciones de qiime2 es la creación de árboles filogenéticos, con base a otros paquetes realizados. En este caso el plugin de "q2-phylogney" nos proporcionará las herramientas para realizarlo.
-# Primero necesitamos alinear las secuencias, esto lo lograremos utilizando MAFFT, un programa que sirve para alinear secuencias, después filtrará los loci (posiciones de nucleótido) más variables y el programa "FastTree" que viene con el plugin, nos dará un árbol sin raíz.
+# Generar un árbol filogenético #
+
+
+## Una de las funciones de qiime2 es la creación de árboles filogenéticos, con base a otros paquetes realizados. En este caso el plugin de "q2-phylogney" nos proporcionará las herramientas para realizarlo.
+### Primero necesitamos alinear las secuencias, esto lo lograremos utilizando MAFFT, un programa que sirve para alinear secuencias, después filtrará los loci (posiciones de nucleótido) más variables y el programa "FastTree" que viene con el plugin, nos dará un árbol sin raíz.
+
+```
 qiime phylogeny align-to-tree-mafft-fasttree \
   --i-sequences rep-seqs.qza \
   --o-alignment aligned-rep-seqs.qza \
   --o-masked-alignment masked-aligned-rep-seqs.qza \
   --o-tree unrooted-tree.qza \
   --o-rooted-tree rooted-tree.qza
+```
 
-# Ahora transformamos el artefacto a un archivo newick (.nwk) el cual se puede visualizar en múltiples programas para árboles, como phyloseq o MEGA. El archivo se encuentra en la carpeta de figuras, con nombre "árbol".
+#### Ahora transformamos el artefacto a un archivo newick (.nwk) el cual se puede visualizar en múltiples programas para árboles, como phyloseq o MEGA. El archivo se encuentra en la carpeta de figuras, con nombre "árbol".
+
+```
 qiime tools export \
   --input-path unrooted-tree.qza \
   --output-path exported-tree
+```
 
 
+# Análisis de diversidad alfa y beta #
 
-########################################
-## Análisis de diversidad alfa y beta ##
-########################################
 
-# Estos análisis los podemos realizar con el plugin "q2-diversity" el cual utiliza análisis estadísticos y genera plots interactivos. Utilizaremos el método de "core-metrics-phylogenetic" que rarefactua una tabla de frecuencia a una profundidad determinada, aplica los análisis de diversidad alfa y beta y genera un Análisis de Coordenadas Principales (PCoA) utilizando EMPeror el cual es una herramienta para visualizar plots.
+## Estos análisis los podemos realizar con el plugin "q2-diversity" el cual utiliza análisis estadísticos y genera plots interactivos. Utilizaremos el método de "core-metrics-phylogenetic" que rarefactua una tabla de frecuencia a una profundidad determinada, aplica los análisis de diversidad alfa y beta y genera un Análisis de Coordenadas Principales (PCoA) utilizando EMPeror el cual es una herramienta para visualizar plots.
 
-# Las métricas que se calculan por defecto son:
-# Diversidad Alfa:
-## Índice de diversidad de Shannon (riqueza de la comunidad cuantitativamente).
-## Características observadas (riqueza de la comunidad cualitativamente).
-## Diversidad filogenética de Faith (riqueza de la comunidad cualitativamente, que incorpora relaciones filogenéticas entre las ellas).
-## Equitatividad de la comunidad (Pielou)
+## Las métricas que se calculan por defecto son:
+### Diversidad Alfa:
+#### * Índice de diversidad de Shannon (riqueza de la comunidad cuantitativamente).
+#### * Características observadas (riqueza de la comunidad cualitativamente).
+#### * Diversidad filogenética de Faith (riqueza de la comunidad cualitativamente, que incorpora relaciones filogenéticas entre las ellas).
+#### * Equitatividad de la comunidad (Pielou)
 
-# Diversidad Beta:
-## Distancia de Jaccard (disimilitud de la comunidad cualitativamente).
-## Distancia de Bray-Curtis (disimilitud de la comunidad cuantitativamente).
-## Distancia UniFrac no ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
-## Distancia UniFrac ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
+### Diversidad Beta:
+#### * Distancia de Jaccard (disimilitud de la comunidad cualitativamente).
+#### * Distancia de Bray-Curtis (disimilitud de la comunidad cuantitativamente).
+#### * Distancia UniFrac no ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
+#### * Distancia UniFrac ponderada (disimilitudde la comunidad cualitativamente, que incorpora relaciones filogenéticas entre ellas).
 
-# En la profundidad (depth) que elegiremos, tenemos que basarnos en las muestras que tenemos de nuestras secuencias, esto es arbitrario y hay que investigar bien para saber cuál será la profundidad, en este caso, como son pocas, elegiremos 390. Esto lo podemos checar en el table.qzv que se nos generó (se encuentra en la carpeta de qiime2).
+## En la profundidad (depth) que elegiremos, tenemos que basarnos en las muestras que tenemos de nuestras secuencias, esto es arbitrario y hay que investigar bien para saber cuál será la profundidad, en este caso, como son pocas, elegiremos 390. Esto lo podemos checar en el table.qzv que se nos generó (se encuentra en la carpeta de qiime2).
 
+```
 qiime diversity core-metrics-phylogenetic \
   --i-phylogeny rooted-tree.qza \
   --i-table table.qza \
   --p-sampling-depth 390 \
   --m-metadata-file sample-metadata.tsv \
   --output-dir core-metrics-results
+```
 
-# Una vez aplicados los análisis de diversidad, podemos realizar comparaciones en la composición microbiana, por ejemplo, ver cómo cambia la diversidad alfa con respecto a diferentes variables (columnas).
+## Una vez aplicados los análisis de diversidad, podemos realizar comparaciones en la composición microbiana, por ejemplo, ver cómo cambia la diversidad alfa con respecto a diferentes variables (columnas).
+
+```
 qiime diversity alpha-group-significance \
   --i-alpha-diversity core-metrics-results/faith_pd_vector.qza \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization core-metrics-results/faith-pd-group-significance.qzv
+```
 
+```
 qiime diversity alpha-group-significance \
   --i-alpha-diversity core-metrics-results/evenness_vector.qza \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization core-metrics-results/evenness-group-significance.qzv
+```
 
-# Finalmente podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras), y si le cambiamos a todas a que nos diferencie por vegetación, podemos ver las diferencias en todas las gráficas.
+### Finalmente podemos visualizar las figuras con los archivos que terminan en .qzv (se encuentran en la carpeta de figuras), y si le cambiamos a todas a que nos diferencie por vegetación, podemos ver las diferencias en todas las gráficas.
 
 
-# Ahora realizaremos un análisis de PERMANOVA (Análisis de varianza multivariado permutacional), el cual es un análisis no parámetrico para comparar entre grupos multivariados. Utilizaremos los datos de diversidad beta. Se puede comparar qué muestras se diferencian entre grupos y cuáles grupos difieren. Se utilizarán las distancias no ponderadas UniFrac realizadas previamente.
+## Ahora realizaremos un análisis de PERMANOVA (Análisis de varianza multivariado permutacional), el cual es un análisis no parámetrico para comparar entre grupos multivariados. Utilizaremos los datos de diversidad beta. Se puede comparar qué muestras se diferencian entre grupos y cuáles grupos difieren. Se utilizarán las distancias no ponderadas UniFrac realizadas previamente.
+
+```
 qiime diversity beta-group-significance \
   --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
   --m-metadata-file sample-metadata.tsv \
   --m-metadata-column vegetation \
   --o-visualization core-metrics-results/unweighted-unifrac-vegetation-significance.qzv \
   --p-pairwise
+```
 
+```
 qiime diversity beta-group-significance \
   --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
   --m-metadata-file sample-metadata.tsv \
   --m-metadata-column transect-name \
   --o-visualization core-metrics-results/unweighted-unifrac-transect-name-significance.qzv \
   --p-pairwise
+```
 
-# Los archivos se pueden visualizar en la carpeta de figuras, recomiendo visualizar la figura de "unweighted-unifrac-vegetation...".
+### Los archivos se pueden visualizar en la carpeta de figuras, recomiendo visualizar la figura de "unweighted-unifrac-vegetation...".
 
 
-##############################
-## Plot de rarefacción alfa ##
-##############################
 
-# Con el visualizador de "qiime diversity alpha-rarefaction" podemos explorar la diversidad alfa. Puede utilizar varios análisis de diversidad alfa. La profundidad (depth) la escojemos con base a la table.tsv. De igual manera hay que investigar bien cuál es una cantidad buena.
+# Plot de rarefacción alfa #
+
+
+## Con el visualizador de "qiime diversity alpha-rarefaction" podemos explorar la diversidad alfa. Puede utilizar varios análisis de diversidad alfa. La profundidad (depth) la escojemos con base a la table.tsv. De igual manera hay que investigar bien cuál es una cantidad buena.
+
+```
 qiime diversity alpha-rarefaction \
   --i-table table.qza \
   --i-phylogeny rooted-tree.qza \
   --p-max-depth 1100 \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization alpha-rarefaction.qzv
+```
 
-# El archivo se encuentra en la carpeta figuras como "alpha-rarefaction.qzv".
-# La visualización contiene 2 plots, el primero es el de rarefacción alfa, y es el principal para revisar que se haya muestreado lo suficiente la riqueza. El plot de abajo se utiliza comparando entre grupos, indica cuantas muestras hay con esa profundidad. 
+#### El archivo se encuentra en la carpeta figuras como "alpha-rarefaction.qzv".
+#### La visualización contiene 2 plots, el primero es el de rarefacción alfa, y es el principal para revisar que se haya muestreado lo suficiente la riqueza. El plot de abajo se utiliza comparando entre grupos, indica cuantas muestras hay con esa profundidad. 
 
-##########################
-## Análisis taxonómicos ##
-##########################
 
-# Ahora analizaremos la composición taxonómica  de las muestras. El primer paso es asignar una clasificación taxonómica a cada secuencia. Utilizaremos el identificador que nos ofrece el tutorial de qiime2: "Naive Bayes classifier" con el plugin "q2-feature-classifier". El clasificador fue entrenado con OTU's de Greengenes 13_8 99%, donde las secuencias se cortaron a 250 bases de la región 16S V4 (primers 515F/806R).
-# Instalamos el clasificador
+# Análisis taxonómicos #
+
+
+## Ahora analizaremos la composición taxonómica  de las muestras. El primer paso es asignar una clasificación taxonómica a cada secuencia. Utilizaremos el identificador que nos ofrece el tutorial de qiime2: "Naive Bayes classifier" con el plugin "q2-feature-classifier". El clasificador fue entrenado con OTU's de Greengenes 13_8 99%, donde las secuencias se cortaron a 250 bases de la región 16S V4 (primers 515F/806R).
+
+## Instalamos el clasificador
+
+```
 wget \
   -O "gg-13-8-99-515-806-nb-classifier.qza" \
   "https://data.qiime2.org/classifiers/sklearn-1.4.2/greengenes/gg-13-8-99-515-806-nb-classifier.qza"
+```
 
-# Ahora realizamos el análisis
+## Ahora realizamos el análisis
+
+```
 qiime feature-classifier classify-sklearn \
   --i-classifier gg-13-8-99-515-806-nb-classifier.qza \
   --i-reads rep-seqs.qza \
   --o-classification taxonomy.qza
+```
 
+```
 qiime metadata tabulate \
   --m-input-file taxonomy.qza \
   --o-visualization taxonomy.qzv
+```
 
-# Ahora tenemos la tabla con la clasificación taxonómica, pero mejor realizamos la gráfica para poder visualizar mejor.
+## Ahora tenemos la tabla con la clasificación taxonómica, pero mejor realizamos la gráfica para poder visualizar mejor.
+
+```
 qiime taxa barplot \
   --i-table table.qza \
   --i-taxonomy taxonomy.qza \
   --m-metadata-file sample-metadata.tsv \
   --o-visualization taxa-bar-plots.qzv
+```
 
-# La figura se encuentra en la carpeta figuras con nombre "taxa-bar-plots.qzv".
-# Podemos visualizar la gráfica y ordenarla con diferentes niveles taxonómicos, por ejemplo, dominio, filo, clase, orden, etc.
+#### La figura se encuentra en la carpeta figuras con nombre "taxa-bar-plots.qzv".
+#### Podemos visualizar la gráfica y ordenarla con diferentes niveles taxonómicos, por ejemplo, dominio, filo, clase, orden, etc.
