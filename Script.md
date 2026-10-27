@@ -155,6 +155,9 @@ qiime metadata tabulate \
 
 
 
+
+
+
 # Generar un árbol filogenético #
 
 
@@ -177,6 +180,9 @@ qiime tools export \
   --input-path unrooted-tree.qza \
   --output-path exported-tree
 ```
+
+
+
 
 
 # Análisis de diversidad alfa y beta #
@@ -251,6 +257,9 @@ qiime diversity beta-group-significance \
 
 
 
+
+
+
 # Plot de rarefacción alfa #
 
 
@@ -267,6 +276,10 @@ qiime diversity alpha-rarefaction \
 
 #### El archivo se encuentra en la carpeta figuras como "alpha-rarefaction.qzv".
 #### La visualización contiene 2 plots, el primero es el de rarefacción alfa, y es el principal para revisar que se haya muestreado lo suficiente la riqueza. El plot de abajo se utiliza comparando entre grupos, indica cuantas muestras hay con esa profundidad. 
+
+
+
+
 
 
 # Análisis taxonómicos #
